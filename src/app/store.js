@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import counterReducer from '../features/counter/counterSlice';
+import mailReducer from '../features/mailSlice';
+
+// redux will allow information to be pushed into a data layer to be accessed by other components
 
 export const store = configureStore({
   reducer: {
-    counter: counterReducer,
+    mail: mailReducer,
   },
 });

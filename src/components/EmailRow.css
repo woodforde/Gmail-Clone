@@ -11,9 +11,13 @@
     box-shadow: 0px 4px 4px -2px rgba(0, 0, 0, 0.24);
 }
 
+.emailRow__info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
 .emailRow__options {
     display: flex;
-
 }
 
 .emailRow__message {
@@ -45,4 +49,8 @@
 .emailRow__description {
     font-weight: 400;
     color: gray;
+}
+
+.starIcon--active {
+    color: orange;
 }

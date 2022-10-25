@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './Sidebar.css';
 import SidebarOption from './SidebarOption';
 import { Button, IconButton } from '@mui/material';
@@ -15,9 +15,50 @@ import DuoIcon from '@mui/icons-material/Duo';
 import PhoneIcon from '@mui/icons-material/Phone';
 import { useDispatch } from 'react-redux';
 import { openSendMessage } from '../features/mailSlice';
+import { collection, getCountFromServer, query, where } from 'firebase/firestore';
+import { db } from '../firebase';
 
 function Sidebar() {
     const dispatch = useDispatch();
+
+    const [counts, setCounts] = useState([]);
+
+    const [inboxCount, setInboxCount] = useState(0);
+    const [starredCount, setStarredCount] = useState(0);
+    const [importantCount, setImportantCount] = useState(0);
+
+    useEffect(() => {
+        const emailsRef = collection(db, 'emails');
+        getCount(emailsRef)
+    }, []);
+
+    const getCount = async (emailsRef) => {
+        const queries = [
+            {type: "inbox", query: query(emailsRef, where('opened', '==', false))},
+            {type: "starred", query: query(emailsRef, where('opened', '==', false), where('starred', '==', true))},
+            {type: "important", query: query(emailsRef, where('opened', '==', false), where('important', '==', true))},
+        ]
+        // const inboxQuery = query(emailsRef, where('opened', '==', false));
+        // const starredQuery = query(emailsRef, where('opened', '==', false), where('starred', '==', true));
+        // const importantQuery = query(emailsRef, where('opened', '==', false), where('important', '==', true));
+
+        const countList = await Promise.all(
+            queries.map(async (query) => ({
+                type: query.type,
+                count: await getCountFromServer(query.query),
+            }))
+        );
+
+        countList.map((countData) => {
+            if (countData.type === "inbox") setInboxCount(countData.count.data().count);
+            if (countData.type === "starred") setStarredCount(countData.count.data().count);
+            if (countData.type === "important") setImportantCount(countData.count.data().count);
+        })
+
+        // console.log(inboxCount)
+        // const snapshot = await getCountFromServer(inboxQuery);
+        // setInboxCount(snapshot.data().count);
+    }
 
   return (
     <div className="sidebar">
@@ -27,13 +68,13 @@ function Sidebar() {
             startIcon={<AddIcon fontSize="large" />}
         >Compose</Button>
 
-        <SidebarOption Icon={InboxIcon} title="Inbox" number={54} selected={true} />
-        <SidebarOption Icon={StarIcon} title="Starred" number={3} />
-        <SidebarOption Icon={AccessTimeIcon} title="Snoozed" number={3} />
-        <SidebarOption Icon={LabelImportantIcon} title="Important" number={3} />
-        <SidebarOption Icon={NearMeIcon} title="Sent" number={3} />
-        <SidebarOption Icon={NoteIcon} title="Drafts" number={3} />
-        <SidebarOption Icon={ExpandMoreIcon} title="More" number={3} />
+        <SidebarOption Icon={InboxIcon} title="Inbox" number={inboxCount} selected={true} />
+        <SidebarOption Icon={StarIcon} title="Starred" number={starredCount} />
+        <SidebarOption Icon={AccessTimeIcon} title="Snoozed" number={0} />
+        <SidebarOption Icon={LabelImportantIcon} title="Important" number={importantCount} />
+        <SidebarOption Icon={NearMeIcon} title="Sent" number={""} />
+        <SidebarOption Icon={NoteIcon} title="Drafts" number={0} />
+        <SidebarOption Icon={ExpandMoreIcon} title="More" number={""} />
 
         <div className="sidebar__footer">
             <div className="sidebar__footerIcons">

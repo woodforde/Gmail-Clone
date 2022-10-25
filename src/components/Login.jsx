@@ -1,16 +1,19 @@
-import { Button } from '@mui/material';
+import './Login.css';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../features/userSlice';
 import { auth, provider } from '../firebase';
-import './Login.css';
+import { signInWithPopup } from 'firebase/auth';
+
+import { Button } from '@mui/material';
 
 function Login() {
   const dispatch = useDispatch();
 
   const signIn = () => {
-    auth.signInWithPopup(provider)
+    signInWithPopup(auth, provider)
       .then(({ user }) => {
+        console.log(user)
         dispatch(login({
           displayName: user.displayName,
           email: user.email,

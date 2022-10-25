@@ -1,16 +1,17 @@
-import React, { useEffect } from 'react';
 import './App.css';
-import Header from './components/Header';
-import Sidebar from './components/Sidebar';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import Mail from './components/Mail';
-import EmailList from './components/EmailList';
-import SendMail from './components/SendMail';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectSendMessageIsOpen } from './features/mailSlice';
 import { login, logout, selectUser } from './features/userSlice';
-import Login from './components/Login';
 import { auth } from './firebase';
+
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Mail from './components/Mail';
+import EmailList from './components/EmailList';
+import SendMail from './components/SendMail';
+import Login from './components/Login';
 
 function App() {
   const sendMessageIsOpen = useSelector(selectSendMessageIsOpen);
@@ -56,7 +57,7 @@ function App() {
               </Routes>
             </div>
 
-            {sendMessageIsOpen && <SendMail />}
+            { sendMessageIsOpen && <SendMail /> }
         </div>
       )}
     </Router>

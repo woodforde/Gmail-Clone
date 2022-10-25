@@ -5,27 +5,46 @@ import { Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { closeSendMessage } from '../features/mailSlice';
+import { selectUser } from '../features/userSlice';
 
 import { db } from '../firebase';
-import firebase from 'firebase/compat/app';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 function SendMail() {
+    const dispatch = useDispatch();
+    const user = useSelector(selectUser);
+
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
-    const onSubmit = (formData) => {
-        console.log(formData);
-        db.collection('emails').add({
+    const onSubmit = async (formData) => {
+        // console.log(formData);
+        await addDoc(collection(db, 'emails'), {
             to: formData.to,
+            from: user.email,
             subject: formData.subject,
             message: formData.message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-        dispatch(closeSendMessage());
-    };
+            timestamp: serverTimestamp(),
+            categories: formData.category === "" ? ["Primary"] : ["Primary", formData.category],
+            important: false,
+            starred: false,
+            opened: false,
+        }).then(() => {
+            dispatch(closeSendMessage());
+        }).catch((err) => alert(err.message));
 
-    const dispatch = useDispatch();
+        // to: string,
+        // from: string,
+        // subject: string,
+        // message:string,
+        // timestamp: timestamp,
+        // categories: [string],
+        // important: boolean default false
+        // starred: boolean default false
+        // opened: boolean default false
+
+    };
 
     return (
         <div className="sendMail">
@@ -51,6 +70,14 @@ function SendMail() {
                     type="text"
                     {...register("subject", { required: true })}
                 />
+                <select
+                    name="category"
+                    defaultValue=""
+                    {...register("category")}
+                >
+                    <option value="">Choose a category (optional)</option>
+                    <option value="Social">Social</option>
+                </select>
                 {errors.subject && <p className="sendMail__error">Subject is Required!</p>}
                 <textarea
                     name="message"

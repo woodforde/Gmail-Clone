@@ -4,16 +4,19 @@ import { Checkbox, IconButton } from '@mui/material';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import StarIcon from '@mui/icons-material/Star';
 import LabelImportantOutlinedIcon from '@mui/icons-material/LabelImportantOutlined';
-import { useNavigate } from 'react-router-dom';
+import LabelImportantIcon from '@mui/icons-material/LabelImportant';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { selectMail } from '../features/mailSlice';
 
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
-function EmailRow({ id, title, subject, description, time, starred }) {
+function EmailRow({ id, title, subject, description, time, starred, important }) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    const { sidebarOption } = useParams();
 
     const openMail = () => {
         dispatch(
@@ -25,14 +28,20 @@ function EmailRow({ id, title, subject, description, time, starred }) {
                 time,
             })
         );
-
-        navigate("/mail");
+        navigate(`/${sidebarOption}/${id}`);
     }
 
     const toggleStarred = async () => {
         const emailRef = doc(db, 'emails', id);
         await updateDoc(emailRef, {
             starred: !starred,
+        });
+    }
+
+    const toggleImportant = async () => {
+        const emailRef = doc(db, 'emails', id);
+        await updateDoc(emailRef, {
+            important: !important,
         });
     }
 
@@ -43,12 +52,16 @@ function EmailRow({ id, title, subject, description, time, starred }) {
                 <IconButton onClick={toggleStarred}>
                     { starred ? (
                         <StarIcon className='starIcon--active' />
-                    ): (
+                    ):(
                         <StarBorderOutlinedIcon />
                     )}
                 </IconButton>
-                <IconButton>
-                    <LabelImportantOutlinedIcon />
+                <IconButton onClick={toggleImportant}>
+                    { important ? (
+                        <LabelImportantIcon className='starIcon--active' />
+                    ):(
+                        <LabelImportantOutlinedIcon />
+                    )}
                 </IconButton>
             </div>
 

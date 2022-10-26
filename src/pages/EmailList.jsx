@@ -15,19 +15,30 @@ import InboxIcon from '@mui/icons-material/Inbox';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
-import Section from './Section';
-import EmailRow from './EmailRow';
+import Section from '../components/Section';
+import EmailRow from '../components/EmailRow';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../features/userSlice';
+import { useParams } from 'react-router-dom';
 
 function EmailList() {
     const [emails, setEmails] = useState([]);
     const [activeSection, setActiveSection] = useState("Primary");
     const user = useSelector(selectUser) || { email: "" };
 
+    let { sidebarOption } = useParams();
+    
     useEffect(() => {
         const emailsRef = collection(db, 'emails');
-        const emailQuery = query(emailsRef, where('to', '==', user.email), where('categories', 'array-contains', activeSection), limit(50));
+        console.log(sidebarOption)
+        let emailQuery;
+        if (sidebarOption === "starred" || sidebarOption === "important") {
+            emailQuery = query(emailsRef, where('to', '==', user.email), where(`${sidebarOption}`, '==', true), limit(50));
+        } else if (sidebarOption === "sent") {
+            emailQuery = query(emailsRef, where('from', '==', user.email), limit(50));
+        } else {
+            emailQuery = query(emailsRef, where('to', '==', user.email), where('categories', 'array-contains', activeSection), limit(50))
+        }
         // orderBy('timestamp', 'desc') cant be implemented because you cannot use an orderBy with a == operator in a query 
         // https://firebase.google.com/docs/firestore/query-data/order-limit-data
 
@@ -38,7 +49,7 @@ function EmailList() {
             })))
         });
 
-    }, [user, activeSection]);
+    }, [user, activeSection, sidebarOption]);
 
     return (
         <div className="emailList">
@@ -70,7 +81,7 @@ function EmailList() {
                     </IconButton>
                 </div>
             </div>
-
+            { sidebarOption == "inbox" &&
             <div className="emailList__sections">
                 <Section    
                     Icon={InboxIcon}
@@ -94,9 +105,10 @@ function EmailList() {
                     setActiveSection={setActiveSection}
                 />
             </div>
+            }
 
             <div className="emailList__list">
-                {emails.map(({ id, data: { to, subject, message, timestamp, starred } }) => (
+                {emails.map(({ id, data: { to, subject, message, timestamp, starred, important } }) => (
                     <EmailRow
                         key={id}
                         id={id}
@@ -105,6 +117,7 @@ function EmailList() {
                         description={message}
                         time={new Date(timestamp?.seconds * 1000).toUTCString()}
                         starred={starred}
+                        important={important}
                     />
                 ))}
             </div>

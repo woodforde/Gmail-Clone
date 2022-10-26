@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, redirect, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectSendMessageIsOpen } from './features/mailSlice';
 import { login, logout, selectUser } from './features/userSlice';
@@ -8,8 +8,8 @@ import { auth } from './firebase';
 
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import Mail from './components/Mail';
-import EmailList from './components/EmailList';
+import Mail from './pages/Mail';
+import EmailList from './pages/EmailList';
 import SendMail from './components/SendMail';
 import Login from './components/Login';
 
@@ -52,8 +52,9 @@ function App() {
 
               {/* Body (Email List) */}
               <Routes>
-                <Route path="/mail" element={<Mail />} />
-                <Route path="/" element={<EmailList />} />
+                <Route path="/" element={<Navigate to="/inbox" />} />
+                <Route path="/:sidebarOption" element={<EmailList />} />
+                <Route path="/:sidebarOption/:id" element={<Mail />} />
               </Routes>
             </div>
 

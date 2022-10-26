@@ -17,6 +17,7 @@ import { useDispatch } from 'react-redux';
 import { openSendMessage } from '../features/mailSlice';
 import { collection, getCountFromServer, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useHref, useParams } from 'react-router-dom';
 
 function Sidebar() {
     const dispatch = useDispatch();
@@ -26,6 +27,8 @@ function Sidebar() {
     const [inboxCount, setInboxCount] = useState(0);
     const [starredCount, setStarredCount] = useState(0);
     const [importantCount, setImportantCount] = useState(0);
+
+    let href = useHref();
 
     useEffect(() => {
         const emailsRef = collection(db, 'emails');
@@ -45,14 +48,14 @@ function Sidebar() {
         const countList = await Promise.all(
             queries.map(async (query) => ({
                 type: query.type,
-                count: await getCountFromServer(query.query),
+                snapshot: await getCountFromServer(query.query),
             }))
         );
 
-        countList.map((countData) => {
-            if (countData.type === "inbox") setInboxCount(countData.count.data().count);
-            if (countData.type === "starred") setStarredCount(countData.count.data().count);
-            if (countData.type === "important") setImportantCount(countData.count.data().count);
+        countList.map((result) => {
+            if (result.type === "inbox") setInboxCount(result.snapshot.data().count);
+            if (result.type === "starred") setStarredCount(result.snapshot.data().count);
+            if (result.type === "important") setImportantCount(result.snapshot.data().count);
         })
 
         // console.log(inboxCount)
@@ -68,7 +71,7 @@ function Sidebar() {
             startIcon={<AddIcon fontSize="large" />}
         >Compose</Button>
 
-        <SidebarOption Icon={InboxIcon} title="Inbox" number={inboxCount} selected={true} />
+        <SidebarOption Icon={InboxIcon} title="Inbox" number={inboxCount} />
         <SidebarOption Icon={StarIcon} title="Starred" number={starredCount} />
         <SidebarOption Icon={AccessTimeIcon} title="Snoozed" number={0} />
         <SidebarOption Icon={LabelImportantIcon} title="Important" number={importantCount} />

@@ -15,7 +15,7 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import PrintIcon from '@mui/icons-material/Print';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { selectOpenMail } from '../features/mailSlice';
 import { useSelector } from 'react-redux';
 
@@ -23,11 +23,13 @@ function Mail() {
     const navigate = useNavigate();
     const selectedMail = useSelector(selectOpenMail);
 
+    let { sidebarOption } = useParams();
+
   return (
     <div className="mail">
         <div className="mail__tools">
             <div className="mail__toolsLeft">
-                <IconButton onClick={() => navigate("/")}>
+                <IconButton onClick={() => navigate(`/${sidebarOption}`)}>
                     <ArrowBackIcon />
                 </IconButton>
                 <IconButton>
